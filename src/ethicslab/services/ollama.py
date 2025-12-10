@@ -1,12 +1,15 @@
+import os
 import httpx
 from fastapi import HTTPException
+
+OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://localhost:11434")
 
 
 async def generate_response(prompt: str, model: str, stream: bool):
     try:
         async with httpx.AsyncClient() as client:
             response = await client.post(
-                "http://localhost:11434/api/generate",
+                f"{OLLAMA_URL}/api/generate",
                 json={
                     "model": model,
                     "prompt": prompt,
