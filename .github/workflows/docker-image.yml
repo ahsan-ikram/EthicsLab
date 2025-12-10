@@ -2,9 +2,8 @@ name: Docker Image CI
 
 on:
   push:
-    branches: [ "*" ]
-  pull_request:
-    branches: [ "*" ]
+    branches: [ "DISABLED" ]
+  workflow_dispatch:
 
 jobs:
   docker:

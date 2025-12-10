@@ -9,10 +9,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         && rm -rf /var/lib/apt/lists/*
 
 # Install Poetry and clean cache
-RUN pip install --no-cache-dir "poetry>=2.2,<2.3"
+RUN pip install --no-cache-dir "uv>=2.2,<2.3"
 
 
-COPY pyproject.toml poetry.lock* README.md /app/
+COPY pyproject.toml uv.lock* README.md /app/
 
 # Install dependencies (no dev, no venv)
 RUN poetry config virtualenvs.create false \
@@ -26,4 +26,4 @@ COPY models/ models/
 EXPOSE 8000
 
 # Run uvicorn via Poetry
-CMD ["poetry", "run", "uvicorn", "autotweet.app:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uv", "run", "uvicorn", "ethicslab.app:app", "--host", "0.0.0.0", "--port", "8000"]
