@@ -1,29 +1,37 @@
-FROM python:3.11-slim
+# Use a slim Python image as a base
+FROM python:3.12-slim-bookworm AS builder
 
+# Set the working directory
 WORKDIR /app
 
-# Install system dependencies required for building Python packages
-RUN apt-get update && apt-get install -y --no-install-recommends \
-        build-essential \
-        curl \
-        && rm -rf /var/lib/apt/lists/*
+# Install uv
+RUN pip install uv
 
-# Install Poetry and clean cache
-RUN pip install --no-cache-dir "uv>=2.2,<2.3"
+# Copy the dependency files
+COPY pyproject.toml uv.lock ./
 
+# Install dependencies
+RUN uv pip install --system --no-cache .
 
-COPY pyproject.toml uv.lock* README.md /app/
+# Use a slim Python image for the final image
+FROM python:3.12-slim-bookworm
 
-# Install dependencies (no dev, no venv)
-RUN poetry config virtualenvs.create false \
-    && poetry install --no-interaction --no-ansi --without dev --no-root
+# Set the working directory
+WORKDIR /app
 
-# Copy project code and models
-COPY src/ src/
-COPY models/ models/
+# Copy the installed dependencies from the builder stage
+COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
+COPY --from=builder /usr/local/bin /usr/local/bin
 
-# Expose FastAPI port
+# Copy the application code
+COPY src/ /app/src
+
+# Create a non-root user
+RUN useradd -m myuser
+USER myuser
+
+# Expose the port the app runs on
 EXPOSE 8000
 
-# Run uvicorn via Poetry
-CMD ["uv", "run", "uvicorn", "ethicslab.app:app", "--host", "0.0.0.0", "--port", "8000"]
+# Set the command to run the application
+CMD ["uvicorn", "src.ethicslab.main:app", "--host", "0.0.0.0", "--port", "8000"]

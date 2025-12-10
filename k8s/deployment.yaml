@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ethicslab-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ethicslab-api
+  template:
+    metadata:
+      labels:
+        app: ethicslab-api
+    spec:
+      containers:
+      - name: ethicslab-api
+        image: ethicslab-api:latest
+        ports:
+        - containerPort: 8000
+        env:
+        - name: OLLAMA_URL
+          value: "http://ollama-service:11434"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ethicslab-api-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: ethicslab-api
+  ports:
+  - port: 80
+    targetPort: 8000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ollama
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ollama
+  template:
+    metadata:
+      labels:
+        app: ollama
+    spec:
+      containers:
+      - name: ollama
+        image: ollama-gemma:latest
+        ports:
+        - containerPort: 11434
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ollama-service
+spec:
+  type: ClusterIP
+  selector:
+    app: ollama
+  ports:
+  - port: 11434
+    targetPort: 11434
