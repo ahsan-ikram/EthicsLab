@@ -15,6 +15,7 @@ spec:
       containers:
       - name: ethicslab-api
         image: ethicslab-api:latest
+        command: ["uv", "run", "uvicorn", "src.ethicslab.main:app", "--host", "0.0.0.0", "--port", "8000"]
         ports:
         - containerPort: 8000
         env:
@@ -26,7 +27,7 @@ kind: Service
 metadata:
   name: ethicslab-api-service
 spec:
-  type: LoadBalancer
+  type: ClusterIP   # portable: works in kind and prod
   selector:
     app: ethicslab-api
   ports:
@@ -50,6 +51,7 @@ spec:
       containers:
       - name: ollama
         image: ollama-gemma:latest
+        command: ["ollama", "serve", "--port", "11434"]   # adjust to your actual start command
         ports:
         - containerPort: 11434
 ---
