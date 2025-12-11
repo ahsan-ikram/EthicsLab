@@ -1,13 +1,14 @@
 from fastapi import FastAPI
+from fastapi.responses import RedirectResponse
 
 from src.ethicslab.api.api import api_router
 
 app = FastAPI()
 
 
-@app.get("/")
+@app.get("/", include_in_schema=False)
 async def root():
-    return {"message": "Welcome to Ethics Lab. Please use /docs for API documentation."}
+    return RedirectResponse(url="/docs")
 
 
 @app.get("/health")
